@@ -22,26 +22,5 @@ function terraformDestroy {
     echo
   fi
 
-  # Comment on the pull request if necessary.
-  if [ "$GITHUB_EVENT_NAME" == "pull_request" ] && [ "${tfComment}" == "1" ]; then
-    destroyCommentWrapper="#### \`terraform destroy\` ${destroyCommentStatus}
-<details><summary>Show Output</summary>
-
-\`\`\`
-${destroyOutput}
-\`\`\`
-
-</details>
-
-*Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`, Working Directory: \`${tfWorkingDir}\`*"
-
-    destroyCommentWrapper=$(stripColors "${destroyCommentWrapper}")
-    echo "destroy: info: creating JSON"
-    destroyPayload=$(echo "${destroyCommentWrapper}" | jq -R --slurp '{body: .}')
-    destroyCommentsURL=$(cat ${GITHUB_EVENT_PATH} | jq -r .pull_request.comments_url)
-    echo "destroy: info: commenting on the pull request"
-    echo "${destroyPayload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${destroyCommentsURL}" > /dev/null
-  fi
-
   exit ${destroyExitCode}
 }

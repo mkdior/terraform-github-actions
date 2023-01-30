@@ -69,26 +69,6 @@ function terraformPlan {
     echo
   fi
 
-  # Comment on the pull request if necessary.
-  if [ "${tfComment}" == "1" ] && [ -n "${tfCommentUrl}" ] && ([ "${planHasChanges}" == "true" ] || [ "${planHasChanges}" == "false" ] || [ "${planCommentStatus}" == "Failed" ]); then
-    planCommentWrapper="#### \`terraform plan\` ${planCommentStatus}
-<details><summary>Show Output</summary>
-
-\`\`\`
-${planOutput}
-\`\`\`
-
-</details>
-
-*Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`, Working Directory: \`${tfWorkingDir}\`, Workspace: \`${tfWorkspace}\`*"
-
-    planCommentWrapper=$(stripColors "${planCommentWrapper}")
-    echo "plan: info: creating JSON"
-    planPayload=$(echo "${planCommentWrapper}" | jq -R --slurp '{body: .}')
-    echo "plan: info: commenting on the pull request"
-    echo "${planPayload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${tfCommentUrl}" > /dev/null
-  fi
-
   echo "2 - set Terraform tf_actions_plan_has_changes to ${planHasChanges}"
   echo ::set-output name=tf_actions_plan_has_changes::${planHasChanges}
 

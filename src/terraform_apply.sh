@@ -25,25 +25,5 @@ function terraformApply {
     echo
   fi
 
-  # Comment on the pull request if necessary.
-  if [ "${tfComment}" == "1" ] && [ -n "${tfCommentUrl}" ]; then
-    applyCommentWrapper="#### \`terraform apply\` ${applyCommentStatus}
-<details><summary>Show Output</summary>
-
-\`\`\`
-${applyOutput}
-\`\`\`
-
-</details>
-
-*Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`, Working Directory: \`${tfWorkingDir}\`, Workspace: \`${tfWorkspace}\`*"
-
-    applyCommentWrapper=$(stripColors "${applyCommentWrapper}")
-    echo "apply: info: creating JSON"
-    applyPayload=$(echo "${applyCommentWrapper}" | jq -R --slurp '{body: .}')
-    echo "apply: info: commenting on the pull request"
-    echo "${applyPayload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${tfCommentUrl}" > /dev/null
-  fi
-
   exit ${applyExitCode}
 }

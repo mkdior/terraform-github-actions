@@ -24,25 +24,5 @@ function terraformTaint {
     echo
   fi
 
-  # Comment on the pull request if necessary.
-  if [ "${tfComment}" == "1" ] && [ -n "${tfCommentUrl}" ]; then
-    taintCommentWrapper="#### \`terraform taint\` ${taintCommentStatus}
-<details><summary>Show Output</summary>
-
-\`\`\`
-${taintOutput}
-\`\`\`
-
-</details>
-
-*Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`, Working Directory: \`${tfWorkingDir}\`, Workspace: \`${tfWorkspace}\`*"
-
-    taintCommentWrapper=$(stripColors "${taintCommentWrapper}")
-    echo "taint: info: creating JSON"
-    taintPayload=$(echo "${taintCommentWrapper}" | jq -R --slurp '{body: .}')
-    echo "taint: info: commenting on the pull request"
-    echo "${taintPayload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${tfCommentUrl}" > /dev/null
-  fi
-
   exit ${taintExitCode}
 }

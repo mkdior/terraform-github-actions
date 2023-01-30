@@ -37,42 +37,5 @@ function terraformFmt {
   echo "${fmtFileList}"
   echo
 
-  # Comment on the pull request if necessary.
-  if [ "${tfComment}" == "1" ] && [ -n "${tfCommentUrl}" ]; then
-    fmtComment=""
-    for file in ${fmtFileList}; do
-      fmtFileDiff=$(terraform fmt -check=true -write=false -diff "${file}" | sed -n '/@@.*/,//{/@@.*/d;p}')
-      fmtComment="${fmtComment}
-<details><summary><code>${tfWorkingDir}/${file}</code></summary>
-
-\`\`\`diff
-${fmtFileDiff}
-\`\`\`
-
-</details>"
-
-    done
-
-    fmtCommentWrapper="#### \`terraform fmt\` Failed
-${fmtComment}
-
-*Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`, Working Directory: \`${tfWorkingDir}\`, Workspace: \`${tfWorkspace}\`*"
-
-    fmtCommentWrapper=$(stripColors "${fmtCommentWrapper}")
-    echo "fmt: info: creating JSON"
-    fmtPayload=$(echo "${fmtCommentWrapper}" | jq -R --slurp '{body: .}')
-    echo "fmt: info: commenting on the pull request"
-    echo "${fmtPayload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${tfCommentUrl}" > /dev/null
-  fi
-
-  # Write changes to branch
-  echo "::set-output name=tf_actions_fmt_written::false"
-  if [ "${tfFmtWrite}" == "1" ]; then
-    echo "fmt: info: Terraform files in ${tfWorkingDir} will be formatted"
-    terraform fmt -write=true ${fmtRecursive} "${*}"
-    fmtExitCode=${?}
-    echo "::set-output name=tf_actions_fmt_written::true"
-  fi
-
   exit ${fmtExitCode}
 }

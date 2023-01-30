@@ -22,25 +22,5 @@ function terraformImport {
     echo
   fi
 
-  # Comment on the pull request if necessary.
-  if [ "${tfComment}" == "1" ] && [ -n "${tfCommentUrl}" ] && [ "${importCommentStatus}" == "Failed" ]; then
-    importCommentWrapper="#### \`terraform import\` ${importCommentStatus}
-<details><summary>Show Output</summary>
-
-\`\`\`
-${importOutput}
-\`\`\`
-
-</details>
-
-*Workflow: \`${GITHUB_WORKFLOW}\`, Action: \`${GITHUB_ACTION}\`, Working Directory: \`${tfWorkingDir}\`, Workspace: \`${tfWorkspace}\`*"
-
-    importCommentWrapper=$(stripColors "${importCommentWrapper}")
-    echo "import: info: creating JSON"
-    importPayload=$(echo "${importCommentWrapper}" | jq -R --slurp '{body: .}')
-    echo "import: info: commenting on the pull request"
-    echo "${importPayload}" | curl -s -S -H "Authorization: token ${GITHUB_TOKEN}" --header "Content-Type: application/json" --data @- "${tfCommentUrl}" > /dev/null
-  fi
-
   exit ${importExitCode}
 }
